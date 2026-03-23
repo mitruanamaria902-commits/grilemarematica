@@ -14,6 +14,17 @@ describe("API Integration Tests", () => {
     expect(authToken).toBeDefined();
   });
 
+  // Admin endpoints
+  test("Seed questions table", async () => {
+    const res = await api("/api/admin/seed-questions", {
+      method: "POST",
+    });
+    await expectStatus(res, 200);
+    const data = await res.json();
+    expect(data.message).toBeDefined();
+    expect(data.inserted).toBeDefined();
+  });
+
   // Questions endpoint tests
   test("List questions (authenticated)", async () => {
     const res = await authenticatedApi("/api/questions", authToken);
