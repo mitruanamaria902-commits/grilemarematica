@@ -30,6 +30,71 @@ interface Question {
   created_at: string;
 }
 
+interface RawQuestion {
+  id?: string;
+  text?: string;
+  question?: string;
+  options?: string[];
+  option_a?: string;
+  option_b?: string;
+  option_c?: string;
+  option_d?: string;
+  correct_answer?: string;
+  correctAnswer?: string;
+  correct_option?: string;
+  category?: string;
+  subject?: string;
+  chapter?: string;
+  difficulty?: string;
+  explanation?: string;
+  created_at?: string;
+}
+
+function normalizeQuestion(raw: RawQuestion): Question {
+  const options: string[] = Array.isArray(raw.options) && raw.options.length === 4
+    ? raw.options
+    : [
+        raw.option_a ?? '',
+        raw.option_b ?? '',
+        raw.option_c ?? '',
+        raw.option_d ?? '',
+      ];
+
+  // correct_answer / correctAnswer may be the full text of the correct option
+  // or a letter like 'a'/'b'/'c'/'d' or index '0'/'1'/'2'/'3'
+  let correctOption = (raw.correct_option ?? raw.correct_answer ?? raw.correctAnswer ?? 'a').toLowerCase();
+
+  // If it's a full-text answer, find which option it matches
+  if (correctOption.length > 1) {
+    const idx = options.findIndex(o => o.toLowerCase() === correctOption);
+    if (idx !== -1) {
+      correctOption = ['a', 'b', 'c', 'd'][idx];
+    } else {
+      correctOption = 'a';
+    }
+  }
+
+  // If it's a digit index ('0'-'3'), convert to letter
+  if (['0', '1', '2', '3'].includes(correctOption)) {
+    correctOption = ['a', 'b', 'c', 'd'][Number(correctOption)];
+  }
+
+  return {
+    id: String(raw.id ?? Math.random()),
+    text: raw.text ?? raw.question ?? '',
+    subject: raw.subject ?? raw.category ?? '',
+    chapter: raw.chapter ?? '',
+    difficulty: raw.difficulty ?? '',
+    option_a: options[0],
+    option_b: options[1],
+    option_c: options[2],
+    option_d: options[3],
+    correct_option: correctOption,
+    explanation: raw.explanation ?? '',
+    created_at: raw.created_at ?? '',
+  };
+}
+
 type AnswerOption = 'a' | 'b' | 'c' | 'd';
 
 interface AnswerRecord {
@@ -102,11 +167,30 @@ export default function QuizScreen() {
       if (params.subject) queryParts.push(`subject=${encodeURIComponent(params.subject)}`);
       if (params.chapter) queryParts.push(`chapter=${encodeURIComponent(params.chapter)}`);
       if (params.adaptive === 'true') queryParts.push('adaptive=true');
-      if (mode) queryParts.push(`mode=${mode}`);
+      // NOTE: do NOT append mode= — backend spec only accepts limit/subject/chapter/adaptive
 
-      const query = queryParts.length ? `?${queryParts.join('&')}` : '';
-      const res = await apiGet<{ questions: Question[] }>(`/api/questions${query}`);
-      const qs = res.questions || [];
+      const query = `?${queryParts.join('&')}`;
+      console.log(`[Quiz] GET /api/questions${query}`);
+      const res = await apiGet<{ questions: RawQuestion[] } | RawQuestion[]>(`/api/questions${query}`);
+      console.log(`[Quiz] Raw response type: ${Array.isArray(res) ? 'array' : typeof res}, keys: ${Array.isArray(res) ? 'N/A' : Object.keys(res ?? {}).join(', ')}`);
+
+      let raw: RawQuestion[];
+      if (Array.isArray(res)) {
+        // Backend returned a bare array
+        console.log(`[Quiz] Response is bare array, length: ${res.length}`);
+        raw = res;
+      } else if (Array.isArray((res as any)?.questions)) {
+        raw = (res as any).questions;
+        console.log(`[Quiz] Response has .questions array, length: ${raw.length}`);
+      } else if (Array.isArray((res as any)?.data)) {
+        raw = (res as any).data;
+        console.log(`[Quiz] Response has .data array, length: ${raw.length}`);
+      } else {
+        console.warn('[Quiz] Unexpected response shape:', JSON.stringify(res)?.slice(0, 200));
+        raw = [];
+      }
+
+      const qs = raw.map(normalizeQuestion);
       setQuestions(qs);
       console.log(`[Quiz] Questions loaded: ${qs.length}`);
     } catch (e: any) {
@@ -115,7 +199,7 @@ export default function QuizScreen() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [limit, mode, params.adaptive, params.chapter, params.subject]);
 
   useEffect(() => {
     fetchQuestions();
