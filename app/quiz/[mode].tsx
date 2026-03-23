@@ -50,6 +50,38 @@ interface RawQuestion {
   created_at?: string;
 }
 
+const FALLBACK_QUESTIONS: Question[] = [
+  { id: '1', subject: 'Algebră', chapter: 'Mulțimi', difficulty: 'usor', text: 'Fie A = {1, 2, 3} și B = {2, 3, 4}. Care este A ∪ B?', option_a: '{1, 2, 3, 4}', option_b: '{2, 3}', option_c: '{1, 4}', option_d: '{1, 2, 3, 4, 5}', correct_option: 'a', explanation: 'Reuniunea A ∪ B conține toate elementele din A și B: {1, 2, 3, 4}.', created_at: '' },
+  { id: '2', subject: 'Algebră', chapter: 'Mulțimi', difficulty: 'usor', text: 'Fie A = {1, 2, 3, 4} și B = {2, 4, 6}. Care este A ∩ B?', option_a: '{1, 3}', option_b: '{2, 4}', option_c: '{1, 2, 3, 4, 6}', option_d: '{6}', correct_option: 'b', explanation: 'Intersecția A ∩ B conține elementele comune: {2, 4}.', created_at: '' },
+  { id: '3', subject: 'Algebră', chapter: 'Numere reale', difficulty: 'usor', text: 'Care este valoarea lui √144?', option_a: '11', option_b: '12', option_c: '13', option_d: '14', correct_option: 'b', explanation: '√144 = 12, deoarece 12² = 144.', created_at: '' },
+  { id: '4', subject: 'Algebră', chapter: 'Numere reale', difficulty: 'mediu', text: 'Simplificați expresia: √75 - √27', option_a: '2√3', option_b: '3√3', option_c: '√3', option_d: '4√3', correct_option: 'a', explanation: '√75 = 5√3, √27 = 3√3, deci √75 - √27 = 5√3 - 3√3 = 2√3.', created_at: '' },
+  { id: '5', subject: 'Algebră', chapter: 'Ecuații gradul I', difficulty: 'usor', text: 'Rezolvați ecuația: 2x + 6 = 14', option_a: 'x = 3', option_b: 'x = 4', option_c: 'x = 5', option_d: 'x = 10', correct_option: 'b', explanation: '2x = 14 - 6 = 8, deci x = 4.', created_at: '' },
+  { id: '6', subject: 'Algebră', chapter: 'Ecuații gradul II', difficulty: 'mediu', text: 'Care sunt soluțiile ecuației x² - 5x + 6 = 0?', option_a: 'x₁=1, x₂=6', option_b: 'x₁=2, x₂=3', option_c: 'x₁=-2, x₂=-3', option_d: 'x₁=1, x₂=5', correct_option: 'b', explanation: 'x² - 5x + 6 = (x-2)(x-3) = 0, deci x=2 sau x=3.', created_at: '' },
+  { id: '7', subject: 'Algebră', chapter: 'Sisteme de ecuații', difficulty: 'mediu', text: 'Rezolvați sistemul: x + y = 7, x - y = 3', option_a: 'x=4, y=3', option_b: 'x=5, y=2', option_c: 'x=3, y=4', option_d: 'x=6, y=1', correct_option: 'b', explanation: 'Adunând: 2x=10, x=5. Din prima ecuație: y=7-5=2.', created_at: '' },
+  { id: '8', subject: 'Algebră', chapter: 'Funcții', difficulty: 'mediu', text: 'Funcția f(x) = 2x - 4. Care este valoarea lui f(3)?', option_a: '1', option_b: '2', option_c: '10', option_d: '6', correct_option: 'b', explanation: 'f(3) = 2·3 - 4 = 6 - 4 = 2.', created_at: '' },
+  { id: '9', subject: 'Algebră', chapter: 'Funcții', difficulty: 'mediu', text: 'Care este zeroul funcției f(x) = 3x - 9?', option_a: 'x = 2', option_b: 'x = 3', option_c: 'x = 4', option_d: 'x = 9', correct_option: 'b', explanation: '3x - 9 = 0 → 3x = 9 → x = 3.', created_at: '' },
+  { id: '10', subject: 'Algebră', chapter: 'Inecuații', difficulty: 'mediu', text: 'Rezolvați inecuația: 3x - 6 > 0', option_a: 'x < 2', option_b: 'x > 2', option_c: 'x < -2', option_d: 'x > -2', correct_option: 'b', explanation: '3x > 6 → x > 2.', created_at: '' },
+  { id: '11', subject: 'Geometrie', chapter: 'Triunghi', difficulty: 'usor', text: 'Un triunghi dreptunghic are catetele 3 cm și 4 cm. Cât este ipotenuza?', option_a: '5 cm', option_b: '6 cm', option_c: '7 cm', option_d: '√7 cm', correct_option: 'a', explanation: 'Prin teorema lui Pitagora: c² = 3² + 4² = 9 + 16 = 25, deci c = 5 cm.', created_at: '' },
+  { id: '12', subject: 'Geometrie', chapter: 'Triunghi', difficulty: 'mediu', text: 'Aria unui triunghi cu baza 8 cm și înălțimea 5 cm este:', option_a: '13 cm²', option_b: '20 cm²', option_c: '40 cm²', option_d: '16 cm²', correct_option: 'b', explanation: 'A = (b × h) / 2 = (8 × 5) / 2 = 20 cm².', created_at: '' },
+  { id: '13', subject: 'Geometrie', chapter: 'Patrulater', difficulty: 'usor', text: 'Perimetrul unui pătrat cu latura 6 cm este:', option_a: '12 cm', option_b: '24 cm', option_c: '36 cm', option_d: '18 cm', correct_option: 'b', explanation: 'P = 4 × l = 4 × 6 = 24 cm.', created_at: '' },
+  { id: '14', subject: 'Geometrie', chapter: 'Patrulater', difficulty: 'mediu', text: 'Aria unui dreptunghi cu lungimea 9 cm și lățimea 4 cm este:', option_a: '26 cm²', option_b: '36 cm²', option_c: '13 cm²', option_d: '45 cm²', correct_option: 'b', explanation: 'A = l × L = 9 × 4 = 36 cm².', created_at: '' },
+  { id: '15', subject: 'Geometrie', chapter: 'Cerc', difficulty: 'usor', text: 'Aria unui cerc cu raza 7 cm este (π ≈ 3,14):', option_a: '43,96 cm²', option_b: '153,86 cm²', option_c: '21,98 cm²', option_d: '44 cm²', correct_option: 'b', explanation: 'A = π × r² = 3,14 × 49 = 153,86 cm².', created_at: '' },
+  { id: '16', subject: 'Geometrie', chapter: 'Cerc', difficulty: 'mediu', text: 'Lungimea unui cerc cu diametrul 10 cm este (π ≈ 3,14):', option_a: '31,4 cm', option_b: '62,8 cm', option_c: '15,7 cm', option_d: '314 cm', correct_option: 'a', explanation: 'C = π × d = 3,14 × 10 = 31,4 cm.', created_at: '' },
+  { id: '17', subject: 'Geometrie', chapter: 'Geometrie în spațiu', difficulty: 'mediu', text: 'Volumul unui cub cu latura 3 cm este:', option_a: '9 cm³', option_b: '18 cm³', option_c: '27 cm³', option_d: '54 cm³', correct_option: 'c', explanation: 'V = l³ = 3³ = 27 cm³.', created_at: '' },
+  { id: '18', subject: 'Geometrie', chapter: 'Geometrie în spațiu', difficulty: 'mediu', text: 'Volumul unui paralelipiped cu dimensiunile 2×3×5 cm este:', option_a: '10 cm³', option_b: '15 cm³', option_c: '25 cm³', option_d: '30 cm³', correct_option: 'd', explanation: 'V = l × L × h = 2 × 3 × 5 = 30 cm³.', created_at: '' },
+  { id: '19', subject: 'Algebră', chapter: 'Proporții', difficulty: 'usor', text: 'Dacă 3/x = 6/10, atunci x este egal cu:', option_a: '2', option_b: '4', option_c: '5', option_d: '20', correct_option: 'c', explanation: '3 × 10 = 6 × x → 30 = 6x → x = 5.', created_at: '' },
+  { id: '20', subject: 'Algebră', chapter: 'Numere reale', difficulty: 'dificil', text: 'Care este valoarea expresiei: (√5 + √3)(√5 - √3)?', option_a: '2', option_b: '4', option_c: '√2', option_d: '8', correct_option: 'a', explanation: '(√5 + √3)(√5 - √3) = (√5)² - (√3)² = 5 - 3 = 2.', created_at: '' },
+];
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 function normalizeQuestion(raw: RawQuestion): Question {
   const options: string[] = Array.isArray(raw.options) && raw.options.length === 4
     ? raw.options
@@ -187,7 +219,15 @@ export default function QuizScreen() {
         raw = [];
       }
 
-      const qs = raw.map(normalizeQuestion);
+      let qs = raw.map(normalizeQuestion);
+
+      if (qs.length === 0) {
+        console.warn('[Quiz] API returned 0 questions — using fallback hardcoded questions');
+        const shuffled = shuffleArray(FALLBACK_QUESTIONS);
+        qs = isExam ? shuffled : shuffled.slice(0, 10);
+        console.log(`[Quiz] Fallback questions loaded: ${qs.length}`);
+      }
+
       setQuestions(qs);
       console.log(`[Quiz] Questions loaded: ${qs.length}`);
     } catch (e: any) {
@@ -196,7 +236,7 @@ export default function QuizScreen() {
     } finally {
       setLoading(false);
     }
-  }, [limit, mode, params.chapter, params.subject]);
+  }, [limit, mode, isExam, params.chapter, params.subject]);
 
   useEffect(() => {
     fetchQuestions();
