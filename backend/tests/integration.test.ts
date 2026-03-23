@@ -32,6 +32,13 @@ describe("API Integration Tests", () => {
     expect(data.questions).toBeDefined();
   });
 
+  test("List questions with chapter filter", async () => {
+    const res = await authenticatedApi("/api/questions?chapter=1", authToken);
+    await expectStatus(res, 200);
+    const data = await res.json();
+    expect(data.questions).toBeDefined();
+  });
+
   test("List questions with difficulty filter", async () => {
     const res = await authenticatedApi("/api/questions?difficulty=easy", authToken);
     await expectStatus(res, 200);
@@ -44,6 +51,11 @@ describe("API Integration Tests", () => {
 
   test("List questions with mode filter", async () => {
     const res = await authenticatedApi("/api/questions?mode=quick", authToken);
+    await expectStatus(res, 200);
+  });
+
+  test("List questions with adaptive parameter", async () => {
+    const res = await authenticatedApi("/api/questions?adaptive=true", authToken);
     await expectStatus(res, 200);
   });
 
@@ -67,6 +79,11 @@ describe("API Integration Tests", () => {
     await expectStatus(res, 404);
   });
 
+  test("Get question with invalid UUID format returns 400", async () => {
+    const res = await authenticatedApi("/api/questions/invalid-uuid", authToken);
+    await expectStatus(res, 400);
+  });
+
   // Progress endpoint tests
   test("Submit answer to question", async () => {
     if (questionId) {
@@ -83,6 +100,33 @@ describe("API Integration Tests", () => {
       const data = await res.json();
       expect(data.success).toBeDefined();
       expect(data.updated_stats).toBeDefined();
+    }
+  });
+
+  test("Submit answer with missing question_id returns 400", async () => {
+    const res = await authenticatedApi("/api/progress", authToken, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        selected_option: "a",
+        is_correct: true,
+      }),
+    });
+    await expectStatus(res, 400);
+  });
+
+  test("Submit answer with invalid selected_option returns 400", async () => {
+    if (questionId) {
+      const res = await authenticatedApi("/api/progress", authToken, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question_id: questionId,
+          selected_option: "e",
+          is_correct: true,
+        }),
+      });
+      await expectStatus(res, 400);
     }
   });
 
@@ -160,6 +204,49 @@ describe("API Integration Tests", () => {
     await expectStatus(res, 201);
     const data = await res.json();
     expect(data.id).toBeDefined();
+  });
+
+  test("Save exam with missing mode returns 400", async () => {
+    const res = await authenticatedApi("/api/exams", authToken, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        total_questions: 5,
+        correct_answers: 3,
+        score: "60%",
+        duration_seconds: 300,
+      }),
+    });
+    await expectStatus(res, 400);
+  });
+
+  test("Save exam with invalid mode returns 400", async () => {
+    const res = await authenticatedApi("/api/exams", authToken, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mode: "invalid",
+        total_questions: 5,
+        correct_answers: 3,
+        score: "60%",
+        duration_seconds: 300,
+      }),
+    });
+    await expectStatus(res, 400);
+  });
+
+  test("Save exam with missing total_questions returns 400", async () => {
+    const res = await authenticatedApi("/api/exams", authToken, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mode: "quick",
+        correct_answers: 3,
+        score: "60%",
+        duration_seconds: 300,
+      }),
+    });
+    await expectStatus(res, 400);
   });
 
   test("Save exam without auth returns 401", async () => {
