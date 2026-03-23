@@ -139,7 +139,6 @@ export default function QuizScreen() {
     mode: string;
     chapter?: string;
     subject?: string;
-    adaptive?: string;
   }>();
 
   const mode = params.mode || 'quick';
@@ -161,22 +160,20 @@ export default function QuizScreen() {
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
   const fetchQuestions = useCallback(async () => {
-    console.log(`[Quiz] Fetching questions — mode=${mode}, chapter=${params.chapter}, subject=${params.subject}, adaptive=${params.adaptive}`);
+    console.log(`[Quiz] Fetching questions — mode=${mode}, chapter=${params.chapter}, subject=${params.subject}`);
     try {
       const queryParts: string[] = [`limit=${limit}`];
       if (params.subject) queryParts.push(`subject=${encodeURIComponent(params.subject)}`);
       if (params.chapter) queryParts.push(`chapter=${encodeURIComponent(params.chapter)}`);
-      if (params.adaptive === 'true') queryParts.push('adaptive=true');
-      // NOTE: do NOT append mode= — backend spec only accepts limit/subject/chapter/adaptive
+      // NOTE: only limit/subject/chapter are supported — do NOT send mode=, adaptive=, or other params
 
       const query = `?${queryParts.join('&')}`;
       console.log(`[Quiz] GET /api/questions${query}`);
       const res = await apiGet<{ questions: RawQuestion[] } | RawQuestion[]>(`/api/questions${query}`);
-      console.log(`[Quiz] Raw response type: ${Array.isArray(res) ? 'array' : typeof res}, keys: ${Array.isArray(res) ? 'N/A' : Object.keys(res ?? {}).join(', ')}`);
+      console.log('[Quiz] Raw response:', JSON.stringify(res)?.slice(0, 500));
 
       let raw: RawQuestion[];
       if (Array.isArray(res)) {
-        // Backend returned a bare array
         console.log(`[Quiz] Response is bare array, length: ${res.length}`);
         raw = res;
       } else if (Array.isArray((res as any)?.questions)) {
@@ -199,7 +196,7 @@ export default function QuizScreen() {
     } finally {
       setLoading(false);
     }
-  }, [limit, mode, params.adaptive, params.chapter, params.subject]);
+  }, [limit, mode, params.chapter, params.subject]);
 
   useEffect(() => {
     fetchQuestions();
@@ -374,7 +371,7 @@ export default function QuizScreen() {
     );
   }
 
-  if (error || questions.length === 0) {
+  if (!loading && (error || questions.length === 0)) {
     return (
       <View
         style={{
