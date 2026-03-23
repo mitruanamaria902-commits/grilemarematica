@@ -74,6 +74,13 @@ describe("API Integration Tests", () => {
     }
   });
 
+  test("Get question without auth returns 401", async () => {
+    if (questionId) {
+      const res = await api(`/api/questions/${questionId}`);
+      await expectStatus(res, 401);
+    }
+  });
+
   test("Get question with nonexistent ID returns 404", async () => {
     const res = await authenticatedApi("/api/questions/00000000-0000-0000-0000-000000000000", authToken);
     await expectStatus(res, 404);
@@ -113,6 +120,34 @@ describe("API Integration Tests", () => {
       }),
     });
     await expectStatus(res, 400);
+  });
+
+  test("Submit answer with missing selected_option returns 400", async () => {
+    if (questionId) {
+      const res = await authenticatedApi("/api/progress", authToken, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question_id: questionId,
+          is_correct: true,
+        }),
+      });
+      await expectStatus(res, 400);
+    }
+  });
+
+  test("Submit answer with missing is_correct returns 400", async () => {
+    if (questionId) {
+      const res = await authenticatedApi("/api/progress", authToken, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question_id: questionId,
+          selected_option: "a",
+        }),
+      });
+      await expectStatus(res, 400);
+    }
   });
 
   test("Submit answer with invalid selected_option returns 400", async () => {
@@ -244,6 +279,48 @@ describe("API Integration Tests", () => {
         correct_answers: 3,
         score: "60%",
         duration_seconds: 300,
+      }),
+    });
+    await expectStatus(res, 400);
+  });
+
+  test("Save exam with missing correct_answers returns 400", async () => {
+    const res = await authenticatedApi("/api/exams", authToken, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mode: "quick",
+        total_questions: 5,
+        score: "60%",
+        duration_seconds: 300,
+      }),
+    });
+    await expectStatus(res, 400);
+  });
+
+  test("Save exam with missing score returns 400", async () => {
+    const res = await authenticatedApi("/api/exams", authToken, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mode: "quick",
+        total_questions: 5,
+        correct_answers: 3,
+        duration_seconds: 300,
+      }),
+    });
+    await expectStatus(res, 400);
+  });
+
+  test("Save exam with missing duration_seconds returns 400", async () => {
+    const res = await authenticatedApi("/api/exams", authToken, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mode: "quick",
+        total_questions: 5,
+        correct_answers: 3,
+        score: "60%",
       }),
     });
     await expectStatus(res, 400);
