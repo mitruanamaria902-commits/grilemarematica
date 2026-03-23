@@ -12,8 +12,8 @@ const getPlugins = () => {
   const { expoClient } = require("@better-auth/expo/client");
   return [
     expoClient({
-      scheme: "creeazaoaplicatie",
-      storagePrefix: "creeazaoaplicatie",
+      scheme: "mategirleen",
+      storagePrefix: "mategirleen",
       storage: SecureStore,
     }),
   ];

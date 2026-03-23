@@ -109,12 +109,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithEmail = async (email: string, password: string) => {
-    await authClient.signIn.email({ email, password });
+    console.log('[AuthContext] signInWithEmail called for:', email);
+    const result = await authClient.signIn.email({ email, password });
+    if (result?.error) {
+      console.error('[AuthContext] signInWithEmail error:', result.error.message);
+      throw new Error(result.error.message || 'Autentificare eșuată. Verifică datele și încearcă din nou.');
+    }
+    console.log('[AuthContext] signInWithEmail success');
     await fetchUser();
   };
 
   const signUpWithEmail = async (email: string, password: string, name?: string) => {
-    await authClient.signUp.email({ email, password, name });
+    console.log('[AuthContext] signUpWithEmail called for:', email);
+    const result = await authClient.signUp.email({ email, password, name: name || '' });
+    if (result?.error) {
+      console.error('[AuthContext] signUpWithEmail error:', result.error.message);
+      throw new Error(result.error.message || 'Înregistrare eșuată. Încearcă din nou.');
+    }
+    console.log('[AuthContext] signUpWithEmail success');
     await fetchUser();
   };
 
