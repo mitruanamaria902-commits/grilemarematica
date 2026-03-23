@@ -1,0 +1,1 @@
+ALTER TABLE "exam_sessions" ALTER COLUMN "score" SET DATA TYPE text;
