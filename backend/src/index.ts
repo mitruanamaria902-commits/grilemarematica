@@ -15,7 +15,9 @@ export const app = await createApplication(schema);
 // Export App type for use in route files
 export type App = typeof app;
 
-// Setup authentication
+// Setup authentication with email/password and OAuth
+// Email/password is enabled by default
+// Google, GitHub, and Apple OAuth use proxy by default (no custom credentials needed)
 app.withAuth();
 
 // Register routes
