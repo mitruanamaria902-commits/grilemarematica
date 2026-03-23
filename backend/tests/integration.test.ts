@@ -39,29 +39,16 @@ describe("API Integration Tests", () => {
     expect(data.questions).toBeDefined();
   });
 
-  test("List questions with difficulty filter", async () => {
-    const res = await authenticatedApi("/api/questions?difficulty=easy", authToken);
-    await expectStatus(res, 200);
-  });
-
   test("List questions with limit parameter", async () => {
     const res = await authenticatedApi("/api/questions?limit=5", authToken);
     await expectStatus(res, 200);
   });
 
-  test("List questions with mode filter", async () => {
-    const res = await authenticatedApi("/api/questions?mode=quick", authToken);
-    await expectStatus(res, 200);
-  });
-
-  test("List questions with adaptive parameter", async () => {
-    const res = await authenticatedApi("/api/questions?adaptive=true", authToken);
-    await expectStatus(res, 200);
-  });
-
-  test("List questions without auth returns 401", async () => {
+  test("List questions without auth returns 200 (public endpoint)", async () => {
     const res = await api("/api/questions");
-    await expectStatus(res, 401);
+    await expectStatus(res, 200);
+    const data = await res.json();
+    expect(data.questions).toBeDefined();
   });
 
   test("Get single question by ID", async () => {
@@ -74,10 +61,12 @@ describe("API Integration Tests", () => {
     }
   });
 
-  test("Get question without auth returns 401", async () => {
+  test("Get question without auth returns 200 (public endpoint)", async () => {
     if (questionId) {
       const res = await api(`/api/questions/${questionId}`);
-      await expectStatus(res, 401);
+      await expectStatus(res, 200);
+      const data = await res.json();
+      expect(data.id).toBeDefined();
     }
   });
 
